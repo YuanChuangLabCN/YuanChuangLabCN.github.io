@@ -1,511 +1,392 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>原创实验室 | YuanChuang LAB</title>
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
-}
-
-:root {
-  --bg-main: #080b10;
-  --bg-card: rgba(18, 24, 32, 0.85);
-  --bg-card-hover: rgba(25, 35, 50, 0.9);
-  --border-color: rgba(0, 204, 255, 0.18);
-  --accent: #00ccff;
-  --accent-soft: rgba(0, 204, 255, 0.08);
-  --text-white: #ffffff;
-  --text-light: #e6edf5;
-  --text-gray: #8899aa;
-  --text-desc: #a0b4cc;
-  --grid-line: rgba(21, 28, 38, 0.55);
-}
-
-body {
-  background-color: var(--bg-main);
-  color: var(--text-light);
-  line-height: 1.65;
-  overflow-x: hidden;
-}
-
-/* 全局网格与微光背景 */
-.grid-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 42px 42px;
-  opacity: 0.55;
-}
-.circuit-glow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 12% 28%, rgba(0, 204, 255, 0.14) 0%, transparent 36%),
-    radial-gradient(circle at 88% 12%, rgba(0, 136, 204, 0.12) 0%, transparent 40%);
-}
-.wrapper {
-  position: relative;
-  z-index: 2;
-}
-
-/* ========= Logo SVG 样式 ========= */
-.logo-svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* 导航栏 */
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 64px;
-  background: rgba(8, 11, 16, 0.92);
-  border-bottom: 1px solid var(--grid-line);
-  backdrop-filter: blur(10px);
-  z-index: 999;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 5vw;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.logo-nav-icon {
-  width:32px;
-  height:32px;
-}
-.logo-text h1 {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text-white);
-}
-.logo-text span {
-  font-size: 11px;
-  color: var(--text-gray);
-}
-nav {
-  display: flex;
-  gap: 28px;
-}
-nav a {
-  color: var(--text-gray);
-  text-decoration: none;
-  font-size: 13px;
-  transition: 0.25s;
-}
-nav a:hover, nav a.active {
-  color: var(--accent);
-}
-
-/* 首屏 Hero */
-.hero {
-  min-height: 100vh;
-  padding-top: 64px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-left: 8vw;
-  padding-right: 8vw;
-}
-.hero h2 {
-  font-size: 52px;
-  line-height: 1.25;
-  margin-bottom: 16px;
-  color: var(--text-white);
-}
-.hero h2 span {
-  color: var(--accent);
-}
-.hero p {
-  max-width: 560px;
-  font-size:15px;
-  color: var(--text-desc);
-  margin-bottom:28px;
-  line-height:1.8;
-}
-.hero-buttons {
-  display:flex;
-  gap:14px;
-  margin-bottom:36px;
-}
-.btn {
-  border:none;
-  outline:none;
-  text-decoration:none;
-  padding:11px 26px;
-  font-size:13px;
-  border-radius:2px;
-  cursor:pointer;
-  transition:0.25s;
-}
-.btn-primary {
-  background: var(--accent);
-  color:#000;
-}
-.btn-primary:hover {
-  background:#33d8ff;
-}
-.btn-outline {
-  background:transparent;
-  border:1px solid var(--border-color);
-  color:var(--text-light);
-}
-.btn-outline:hover {
-  border-color:var(--accent);
-  color:var(--accent);
-}
-.tags {
-  display:flex;
-  gap:18px;
-  font-size:12px;
-  color:var(--text-gray);
-}
-
-/* 通用区块 */
-.section {
-  padding: 100px 8vw 80px;
-  max-width: 1280px;
-  margin:0 auto;
-}
-.section-title small {
-  display:block;
-  font-size:12px;
-  color:var(--text-gray);
-  letter-spacing:1px;
-  margin-bottom:8px;
-}
-.section-title h3 {
-  font-size:30px;
-  color:var(--text-white);
-  font-weight:500;
-  margin-bottom:28px;
-}
-
-/* ========= 信封公开信【静态固定，无动画】 ========= */
-.envelope-wrap {
-  max-width:760px;
-  margin:0 auto;
-  position:relative;
-}
-/* 信封顶部印章，放置你的Logo */
-.seal-stamp {
-  width:60px;
-  height:60px;
-  position:absolute;
-  top:-30px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:3;
-  border-radius:50%;
-  border:2px solid var(--accent);
-  background:#0a0e14;
-  padding:4px;
-}
-.envelope-card {
-  background: var(--bg-card);
-  border:1px solid var(--border-color);
-  border-radius:6px;
-  padding:32px 28px 28px;
-  box-shadow:0 0 22px var(--accent-soft);
-}
-.envelope-card h4 {
-  text-align:center;
-  font-size:22px;
-  color:var(--text-white);
-  margin-bottom:22px;
-}
-.letter-body p {
-  font-size:15px;
-  color:var(--text-desc);
-  line-height:1.9;
-  margin-bottom:14px;
-}
-.letter-footer {
-  margin-top:28px;
-  text-align:right;
-  font-size:14px;
-  color:var(--text-gray);
-}
-.letter-footer .accent {
-  color:var(--accent);
-  margin-top:6px;
-  font-size:13px;
-}
-
-/* 空白格子 */
-.grid-4 {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:22px;
-}
-.grid-3 {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:22px;
-}
-.empty-box {
-  background:var(--bg-card);
-  border:1px solid var(--border-color);
-  border-radius:6px;
-  min-height:150px;
-  transition:0.25s;
-}
-.empty-box:hover {
-  background:var(--bg-card-hover);
-  border-color:rgba(0,204,255,0.35);
-}
-.log-list {
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.log-item {
-  background:var(--bg-card);
-  border:1px solid var(--border-color);
-  border-radius:6px;
-  min-height:96px;
-  width:100%;
-  transition:0.25s;
-}
-.log-item:hover {
-  background:var(--bg-card-hover);
-  border-color:rgba(0,204,255,0.35);
-}
-
-/* 页脚 */
-footer {
-  border-top:1px solid var(--grid-line);
-  padding:40px 8vw;
-  max-width:1280px;
-  margin:0 auto;
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  flex-wrap:wrap;
-  gap:24px;
-}
-.footer-logo-icon {
-  width:32px;
-  height:32px;
-}
-.footer-left p {
-  font-size:12px;
-  color:var(--text-gray);
-  margin-top:8px;
-  max-width:460px;
-}
-.footer-right {
-  text-align:right;
-  font-size:12px;
-  color:var(--text-gray);
-}
-.footer-right .brand {
-  color:var(--accent);
-  font-size:14px;
-  margin-bottom:4px;
-}
-.copyright {
-  border-top:1px solid var(--grid-line);
-  text-align:center;
-  padding:12px;
-  font-size:11px;
-  color:#556677;
-}
-
-/* 移动端适配 */
-@media (max-width:1100px){
-  .grid-4 { grid-template-columns:repeat(2,1fr); }
-  .grid-3 { grid-template-columns:repeat(2,1fr); }
-}
-@media (max-width:720px){
-  header {
-    flex-direction:column;
-    height:auto;
-    padding:12px 5vw;
-  }
-  nav { margin-top:10px; gap:16px; }
-  .hero { padding-top:100px; }
-  .hero h2 { font-size:36px; }
-  .grid-4,.grid-3 { grid-template-columns:1fr; }
-  footer { flex-direction:column; align-items:flex-start; }
-  .footer-right { text-align:left; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原创实验室 YuanChuang Lab | 底层工程实证研发</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        labBlack: '#0a0c10',
+                        labDark: '#11141a',
+                        labBorder: '#1e2530',
+                        labPrimary: '#0ea5e9',
+                        labCyan: '#22d3ee',
+                        labGray: '#94a3b8',
+                    },
+                    fontFamily: {
+                        code: ['JetBrains Mono', 'Consolas', 'monospace'],
+                        eng: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'data-flow': 'flow 8s linear infinite',
+                        'glow': 'glow 3s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        flow: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' }
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 8px #0ea5e940' },
+                            '100%': { boxShadow: '0 0 20px #22d3ee60' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+                background-image: linear-gradient(90deg, #0ea5e9, #22d3ee);
+            }
+            .border-glow {
+                @apply border border-labPrimary/30 animate-glow rounded-md;
+            }
+            .bg-grid {
+                background-image: 
+                    linear-gradient(#1e2530 1px, transparent 1px),
+                    linear-gradient(90deg, #1e2530 1px, transparent 1px);
+                background-size: 40px 40px;
+            }
+            .data-line {
+                position: absolute;
+                width: 1px;
+                height: 60px;
+                background: linear-gradient(to bottom, transparent, #0ea5e960, transparent);
+                animation: flow 8s linear infinite;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="bg-labBlack text-slate-200 font-code overflow-x-hidden relative">
+    <!-- 背景数据流粒子 -->
+    <div id="dataBg" class="fixed inset-0 bg-grid opacity-30 pointer-events-none z-0"></div>
 
-<div class="grid-bg"></div>
-<div class="circuit-glow"></div>
-
-<div class="wrapper">
-  <header>
-    <div class="logo">
-      <!-- =========导航栏Logo（内联SVG你的三角圆环） ========= -->
-      <div class="logo-nav-icon">
-<svg class="logo-svg" viewBox="0 0 512 512" fill="none">
-  <circle cx="256" cy="256" r="230" stroke="#00ccff" stroke-width="22"/>
-  <path d="M256 80L400 340H112L256 80Z" stroke="#00ccff" stroke-width="20" fill="none"/>
-  <path d="M256 160L344 320H168L256 160Z" stroke="#00ccff" stroke-width="18" fill="none"/>
-</svg>
-      </div>
-      <div class="logo-text">
-        <h1>原创实验室</h1>
-        <span>YUANCHUANG LAB</span>
-      </div>
-    </div>
-    <nav>
-      <a href="#hero" class="active">首页</a>
-      <a href="#intro">实验室简介</a>
-      <a href="#research">研究方向</a>
-      <a href="#archive">开源研发存档</a>
-      <a href="#log">实验调试日志</a>
-    </nav>
-  </header>
-
-  <section class="hero" id="hero">
-    <h2><span>以原创</span>，构建未来</h2>
-    <p>独立非盈利硬核工程实验室，深耕底层硬件与数字技术，聚焦本地AI算力集群、通信网络底层调优、嵌入式硬件重构与Linux架构实证研究。</p>
-    <div class="hero-buttons">
-      <a href="#research" class="btn btn-primary">查看研究方向</a>
-      <a href="#archive" class="btn btn-outline">开源研发存档</a>
-    </div>
-    <div class="tags">
-      <span>本地AI算力集群</span>
-      <span>通信网络底层调优</span>
-      <span>嵌入式硬件重构</span>
-    </div>
-  </section>
-
-  <section class="section" id="intro">
-    <div class="section-title">
-      <small>LAB INTRODUCTION</small>
-      <h3>实验室简介</h3>
-    </div>
-
-    <div class="envelope-wrap">
-      <!-- =========信封顶部印章Logo========= -->
-      <div class="seal-stamp">
-<svg class="logo-svg" viewBox="0 0 512 512" fill="none">
-  <circle cx="256" cy="256" r="230" stroke="#00ccff" stroke-width="22"/>
-  <path d="M256 80L400 340H112L256 80Z" stroke="#00ccff" stroke-width="20" fill="none"/>
-  <path d="M256 160L344 320H168L256 160Z" stroke="#00ccff" stroke-width="18" fill="none"/>
-</svg>
-      </div>
-      <div class="envelope-card">
-        <h4>致未来</h4>
-        <div class="letter-body">
-          <p>此刻原创实验室正处于筹建起步阶段，我们逐步搭建本地私有化大模型算力集群、配齐3D打印设备、嵌入式硬件改装工作台、通信网络调试实验装置，所有研究结论均以物理实测作为唯一验证标准。</p>
-          <p>在此向未来立下永久准则：实验室所有技术资料、调试方案、硬件设计、代码工程，终身免费开源开放，允许任意主体进行二次开源、参考复用。</p>
-          <p>客观补充说明：实验室为纯非盈利技术探索载体，无商业营收，研发耗材与设备采购全部由线下工作室业务收益持续输血支撑。实验室产出仅代表实验探索性质成果，不等同于线下工作室标准化商业出品；受前沿试错属性影响，内容大概率存在较多BUG、稳定性有限，仅用于长期技术探索与开源交流。</p>
-          <p>我们拒绝表层商业化包装，坚持深耕底层工程实证，以实测印证理论，以开源回馈漫长的技术时间线。</p>
-          <p>印章撕开并非契约失效，而是当下的探索，从此向未来全程敞开。</p>
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-50 bg-labDark/80 backdrop-blur-md border-b border-labBorder">
+        <div class="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
+            <a href="#" class="flex items-center gap-3">
+                <div class="w-10 h-10 flex items-center justify-center border-glow">
+                    <i class="fa fa-microchip text-labCyan text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-gradient">原创实验室</h1>
+                    <p class="text-xs text-labGray tracking-widest">YUANCHUANG LAB</p>
+                </div>
+            </a>
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex gap-8 text-sm">
+                <a href="#home" class="hover:text-labCyan transition-colors">首页</a>
+                <a href="#about" class="hover:text-labCyan transition-colors">实验室简介</a>
+                <a href="#research" class="hover:text-labCyan transition-colors">研究方向</a>
+                <a href="#works" class="hover:text-labCyan transition-colors">研发成果</a>
+                <a href="#log" class="hover:text-labCyan transition-colors">实验日志</a>
+            </nav>
+            <!-- 移动端菜单按钮 -->
+            <button id="menuBtn" class="md:hidden text-labCyan text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
         </div>
-        <div class="letter-footer">
-          <p>写信人：原创实验室</p>
-          <p class="accent">Temporal Generation · 技术恒存，迭代不止</p>
+        <!-- 移动端下拉菜单 -->
+        <div id="mobileMenu" class="hidden md:hidden bg-labDark border-t border-labBorder px-4 py-4">
+            <nav class="flex flex-col gap-4 text-sm">
+                <a href="#home" class="hover:text-labCyan transition-colors">首页</a>
+                <a href="#about" class="hover:text-labCyan transition-colors">实验室简介</a>
+                <a href="#research" class="hover:text-labCyan transition-colors">研究方向</a>
+                <a href="#works" class="hover:text-labCyan transition-colors">研发成果</a>
+                <a href="#log" class="hover:text-labCyan transition-colors">实验日志</a>
+            </nav>
         </div>
-      </div>
-    </div>
-  </section>
+    </header>
 
-  <section class="section" id="research">
-    <div class="section-title">
-      <small>RESEARCH DIRECTION</small>
-      <h3>研究方向</h3>
-    </div>
-    <div class="grid-4">
-      <div class="empty-box"></div>
-      <div class="empty-box"></div>
-      <div class="empty-box"></div>
-      <div class="empty-box"></div>
-    </div>
-  </section>
+    <main class="relative z-10">
+        <!-- 首屏 Hero 区域 -->
+        <section id="home" class="min-h-[85vh] flex items-center container mx-auto px-4 md:px-8 py-16">
+            <div class="max-w-4xl">
+                <p class="text-labCyan text-sm tracking-[0.3em] mb-4">PHYSICAL ENGINEERING & BOTTOM-TECH RESEARCH</p>
+                <h2 class="text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-tight mb-6">
+                    <span class="text-gradient">深耕底层技术</span><br>
+                    以物理实践印证数字规律
+                </h2>
+                <p class="text-labGray text-lg md:text-xl max-w-2xl mb-10 leading-relaxed">
+                    独立非盈利硬核工程实验室，专注硬件改造、网络底层、Linux架构、本地AI算力集群实证研究。
+                    所有自研成果完成专利备案后全开源，拒绝表层商业包装，只做纯粹技术沉淀。
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#research" class="px-6 py-3 bg-labPrimary hover:bg-labCyan transition-colors text-labBlack font-bold rounded-sm">
+                        查看研究领域
+                    </a>
+                    <a href="#works" class="px-6 py-3 border border-labPrimary/50 hover:border-labCyan transition-colors rounded-sm">
+                        开源研发存档
+                    </a>
+                </div>
+                <div class="mt-16 flex items-center gap-6 text-labGray text-sm">
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-server text-labCyan"></i>
+                        <span>本地AI算力集群</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-sitemap text-labCyan"></i>
+                        <span>通信网络底层调优</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-cogs text-labCyan"></i>
+                        <span>嵌入式硬件重构</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  <section class="section" id="archive">
-    <div class="section-title">
-      <small>OPEN SOURCE ARCHIVE</small>
-      <h3>开源研发存档</h3>
-    </div>
-    <div class="grid-3">
-      <div class="empty-box"></div>
-      <div class="empty-box"></div>
-      <div class="empty-box"></div>
-    </div>
-  </section>
+        <!-- 实验室简介 -->
+        <section id="about" class="bg-labDark py-20">
+            <div class="container mx-auto px-4 md:px-8">
+                <div class="mb-12">
+                    <p class="text-labCyan text-sm tracking-[0.2em] mb-2">ABOUT LAB</p>
+                    <h3 class="text-3xl md:text-4xl font-bold">实验室内核与研发理念</h3>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6 text-labGray leading-relaxed">
+                        <p>原创实验室起源于童年家庭工程实验室熏陶，以「物理实证主义」为核心研发准则，拒绝纸上谈兵，所有技术结论均经过拆解、焊接、组网、实测复现验证。</p>
+                        <p>本实验室完全剥离商业盈利诉求，不承接外包、不售卖技术服务、不打造流量产品。资金全部来源于个人副业收入，90%收益持续反哺硬件设备与底层技术探索。</p>
+                        <p class="text-labCyan font-bold text-lg">Temporal Generation — 技术恒存，迭代不止</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-glow p-6">
+                            <i class="fa fa-code-fork text-3xl text-labCyan mb-4"></i>
+                            <h4 class="text-xl font-bold mb-2">开源无私</h4>
+                            <p class="text-sm text-labGray">自研模块专利保护后全公开，无技术封锁，供开发者共同验证迭代</p>
+                        </div>
+                        <div class="border-glow p-6">
+                            <i class="fa fa-flask text-3xl text-labCyan mb-4"></i>
+                            <h4 class="text-xl font-bold mb-2">实证研发</h4>
+                            <p class="text-sm text-labGray">所有理论必须通过物理设备实测，杜绝纯纸面推演</p>
+                        </div>
+                        <div class="border-glow p-6">
+                            <i class="fa fa-layer-group text-3xl text-labCyan mb-4"></i>
+                            <h4 class="text-xl font-bold mb-2">深耕底层</h4>
+                            <p class="text-sm text-labGray">避开浅层应用开发，聚焦硬件、系统、通信基础架构</p>
+                        </div>
+                        <div class="border-glow p-6">
+                            <i class="fa fa-search text-3xl text-labCyan mb-4"></i>
+                            <h4 class="text-xl font-bold mb-2">垂直深耕</h4>
+                            <p class="text-sm text-labGray">不泛化涉猎，四大固定方向持续长期深度研究</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  <section class="section" id="log">
-    <div class="section-title">
-      <small>DEBUG LOG</small>
-      <h3>实验调试日志</h3>
-    </div>
-    <div class="log-list">
-      <div class="log-item"></div>
-      <div class="log-item"></div>
-      <div class="log-item"></div>
-    </div>
-  </section>
+        <!-- 四大研究方向 -->
+        <section id="research" class="py-20 container mx-auto px-4 md:px-8">
+            <div class="mb-12">
+                <p class="text-labCyan text-sm tracking-[0.2em] mb-2">RESEARCH DIRECTION</p>
+                <h3 class="text-3xl md:text-4xl font-bold">四大垂直研发领域</h3>
+            </div>
+            <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <!-- 1 网络基建底层 -->
+                <div class="border-glow p-8 h-full">
+                    <i class="fa fa-wifi text-4xl text-labCyan mb-6"></i>
+                    <h4 class="text-2xl font-bold mb-4">网络基建底层研究</h4>
+                    <ul class="space-y-3 text-labGray text-sm">
+                        <li>• 企业交换机深度调优、复杂园区网络重构</li>
+                        <li>• OLT光纤通信原理与局域网架构搭建</li>
+                        <li>• 铜缆/光纤链路性能对比与带宽调度优化</li>
+                        <li>• 多设备混合环境网络故障底层排查方案</li>
+                    </ul>
+                </div>
+                <!-- 2 嵌入式硬件改造 -->
+                <div class="border-glow p-8 h-full">
+                    <i class="fa fa-microchip text-4xl text-labCyan mb-6"></i>
+                    <h4 class="text-2xl font-bold mb-4">嵌入式硬件重构</h4>
+                    <ul class="space-y-3 text-labGray text-sm">
+                        <li>• 芯片模块拆解、电路焊接与无尘硬件改装</li>
+                        <li>• 自研传感模块、物理设备工程复现</li>
+                        <li>• 3D打印硬件外壳配套电子方案设计</li>
+                        <li>• 民用声学、声纳通信设备底层调试</li>
+                    </ul>
+                </div>
+                <!-- 3 Linux底层架构 -->
+                <div class="border-glow p-8 h-full">
+                    <i class="fa fa-terminal text-4xl text-labCyan mb-6"></i>
+                    <h4 class="text-2xl font-bold mb-4">Linux系统底层研究</h4>
+                    <ul class="space-y-3 text-labGray text-sm">
+                        <li>• 发行版深度定制、服务器极简裁剪</li>
+                        <li>• 网工专用Linux环境部署与工具链搭建</li>
+                        <li>• Windows/Linux双系统集群协同方案</li>
+                        <li>• 本地服务器运维、私有网络服务搭建</li>
+                    </ul>
+                </div>
+                <!-- 4 本地AI算力集群 -->
+                <div class="border-glow p-8 h-full">
+                    <i class="fa fa-cube text-4xl text-labCyan mb-6"></i>
+                    <h4 class="text-2xl font-bold mb-4">本地AI算力落地</h4>
+                    <ul class="space-y-3 text-labGray text-sm">
+                        <li>• Mac Studio多机本地大模型集群搭建</li>
+                        <li>• 模型私有化本地推理、离线部署方案</li>
+                        <li>• AI辅助硬件3D建模、工程图纸生成</li>
+                        <li>• 无外网私有算力环境安全隔离架构</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-  <footer>
-    <div class="footer-left">
-      <div class="logo">
-        <!-- =========页脚Logo========= -->
-        <div class="footer-logo-icon">
-<svg class="logo-svg" viewBox="0 0 512 512" fill="none">
-  <circle cx="256" cy="256" r="230" stroke="#00ccff" stroke-width="22"/>
-  <path d="M256 80L400 340H112L256 80Z" stroke="#00ccff" stroke-width="20" fill="none"/>
-  <path d="M256 160L344 320H168L256 160Z" stroke="#00ccff" stroke-width="18" fill="none"/>
-</svg>
+        <!-- 研发成果 -->
+        <section id="works" class="bg-labDark py-20">
+            <div class="container mx-auto px-4 md:px-8">
+                <div class="mb-12">
+                    <p class="text-labCyan text-sm tracking-[0.2em] mb-2">OPEN SOURCE WORKS</p>
+                    <h3 class="text-3xl md:text-4xl font-bold">开源研发存档成果</h3>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- 成果卡片1 -->
+                    <div class="border border-labBorder hover:border-labPrimary/50 transition-colors p-6 rounded-md">
+                        <div class="text-labCyan text-xs mb-2">网络底层 · 开源方案</div>
+                        <h4 class="text-xl font-bold mb-3">园区混合网络优化脚本库</h4>
+                        <p class="text-labGray text-sm mb-4">华为S5700交换机、TP-Link设备批量调优配置脚本，适配复杂多设备局域网故障排查</p>
+                        <a href="#" class="text-labCyan text-sm flex items-center gap-2 hover:gap-3 transition-all">
+                            查看开源文档 <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <!-- 成果卡片2 -->
+                    <div class="border border-labBorder hover:border-labPrimary/50 transition-colors p-6 rounded-md">
+                        <div class="text-labCyan text-xs mb-2">硬件工程 · 开源模块</div>
+                        <h4 class="text-xl font-bold mb-3">通用传感硬件改装套件</h4>
+                        <p class="text-labGray text-sm mb-4">自研低成本传感器电路图纸、焊接流程、3D打印外壳模型全开源资料包</p>
+                        <a href="#" class="text-labCyan text-sm flex items-center gap-2 hover:gap-3 transition-all">
+                            查看开源文档 <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <!-- 成果卡片3 -->
+                    <div class="border border-labBorder hover:border-labPrimary/50 transition-colors p-6 rounded-md">
+                        <div class="text-labCyan text-xs mb-2">算力集群 · 部署教程</div>
+                        <h4 class="text-xl font-bold mb-3">本地多机AI集群搭建手册</h4>
+                        <p class="text-labGray text-sm mb-4">Mac Studio集群离线大模型推理完整部署流程，私有隔离算力环境搭建指南</p>
+                        <a href="#" class="text-labCyan text-sm flex items-center gap-2 hover:gap-3 transition-all">
+                            查看开源文档 <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实验日志 -->
+        <section id="log" class="py-20 container mx-auto px-4 md:px-8">
+            <div class="mb-12">
+                <p class="text-labCyan text-sm tracking-[0.2em] mb-2">LAB DEBUG LOG</p>
+                <h3 class="text-3xl md:text-4xl font-bold">实验调试日志</h3>
+            </div>
+            <div class="space-y-6 max-w-3xl">
+                <!-- 日志单条 -->
+                <div class="border-glow p-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-labCyan text-sm">2026-08-07</span>
+                        <span class="text-xs px-2 py-1 bg-labPrimary/20 text-labCyan">硬件调试</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">3D打印传感设备外壳结构优化测试</h4>
+                    <p class="text-labGray text-sm">完成多版外壳公差测试，修正电路接口卡位尺寸，配套AI建模脚本同步上传开源仓库，解决焊接装配干涉问题。</p>
+                </div>
+                <div class="border-glow p-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-labCyan text-sm">2026-08-05</span>
+                        <span class="text-xs px-2 py-1 bg-labPrimary/20 text-labCyan">算力集群</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">四台Mac Studio本地模型并行推理调优</h4>
+                    <p class="text-labGray text-sm">完成私有内网算力调度脚本编写，隔离外网访问通道，测试离线模型加载速度，优化多机显存分配策略。</p>
+                </div>
+                <div class="border-glow p-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-labCyan text-sm">2026-08-03</span>
+                        <span class="text-xs px-2 py-1 bg-labPrimary/20 text-labCyan">网络调优</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">OLT光纤局域网带宽分配实测记录</h4>
+                    <p class="text-labGray text-sm">对比铜缆与光纤链路延迟差异，整理多设备并发场景下QoS调度配置方案，文档归档至网络开源库。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-labDark border-t border-labBorder py-12 relative z-10">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex flex-col md:flex-row justify-between gap-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 flex items-center justify-center border-glow">
+                            <i class="fa fa-microchip text-labCyan text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-gradient">原创实验室</h4>
+                            <p class="text-xs text-labGray tracking-widest">YUANCHUANG LAB</p>
+                        </div>
+                    </div>
+                    <p class="text-labGray max-w-md text-sm">纯底层工程实证私人实验室，非盈利开源研发机构，无商业服务、无外包接单业务。</p>
+                </div>
+                <div class="md:text-right">
+                    <p class="text-labCyan font-bold mb-2 text-lg">Temporal Generation</p>
+                    <p class="text-labGray text-sm mb-4">技术恒存，迭代不止 | Open Source & Pure Research</p>
+                    <div class="flex gap-4 md:justify-end text-labCyan text-lg">
+                        <a href="#" target="_blank"><i class="fa fa-github"></i></a>
+                        <a href="#" target="_blank"><i class="fa fa-code-fork"></i></a>
+                        <a href="#" target="_blank"><i class="fa fa-terminal"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-10 pt-6 border-t border-labBorder text-center text-labGray text-xs">
+                © 2026 原创实验室 YuanChuang Lab · 所有开源内容遵循开源协议公开共享
+            </div>
         </div>
-        <div class="logo-text">
-          <h1>原创实验室</h1>
-          <span>YUANCHUANG LAB</span>
-        </div>
-      </div>
-      <p>纯底层工程实证私人实验室，非盈利开源研发载体。所有研究内容以物理实测为验证标准，拒绝表层商业化包装。</p>
-    </div>
-    <div class="footer-right">
-      <p class="brand">Temporal Generation</p>
-      <p>技术恒存，迭代不止</p>
-    </div>
-  </footer>
-  <div class="copyright">
-    © 2026 原创实验室 YuanChuang Lab · 所有开源内容遵循开源协议公开共享
-  </div>
-</div>
+    </footer>
 
-<script>
-//平滑滚动
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if(target){
-      target.scrollIntoView({ behavior:'smooth', block:'start' });
-    }
-  });
-});
-</script>
+    <!-- 交互JS脚本 -->
+    <script>
+        // 移动端菜单切换
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
 
+        // 平滑滚动锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                // 点击后关闭移动端菜单
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // 生成背景流动数据流线条
+        const dataBg = document.getElementById('dataBg');
+        function createDataLine() {
+            const line = document.createElement('div');
+            line.className = 'data-line';
+            // 随机横向位置
+            line.style.left = Math.random() * 100 + '%';
+            // 随机动画时长
+            line.style.animationDuration = (6 + Math.random() * 6) + 's';
+            dataBg.appendChild(line);
+            // 线条循环销毁重建
+            setTimeout(() => {
+                line.remove();
+            }, 12000);
+        }
+        // 初始生成30条数据流
+        for(let i=0; i<30; i++) createDataLine();
+        // 持续新增线条
+        setInterval(createDataLine, 400);
+    </script>
 </body>
 </html>

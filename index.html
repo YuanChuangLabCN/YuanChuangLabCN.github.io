@@ -6,179 +6,287 @@
     <title>原创实验室 YuanChuang Lab | 底层工程实证研发</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        labBlack: '#0a0c10',
-                        labDark: '#11141a',
-                        labBorder: '#1e2530',
-                        labPrimary: '#0ea5e9',
-                        labCyan: '#22d3ee',
-                        labGray: '#94a3b8',
+                        primary: '#059669',
+                        primaryDark: '#047857',
+                        primaryLight: '#10b981',
+                        bgLight: '#f8faf9',
+                        textMain: '#111827',
+                        textGray: '#6b7280',
+                        textLight: '#9ca3af',
                     },
                     fontFamily: {
-                        code: ['JetBrains Mono', 'Consolas', 'monospace'],
-                        eng: ['Inter', 'sans-serif']
+                        sans: ['"Noto Sans SC"', '"Inter"', 'system-ui', 'sans-serif'],
                     },
-                    animation: {
-                        'data-flow': 'flow 8s linear infinite',
-                        'glow': 'glow 3s ease-in-out infinite alternate',
-                    },
-                    keyframes: {
-                        flow: {
-                            '0%': { transform: 'translateY(-100%)' },
-                            '100%': { transform: 'translateY(100%)' }
-                        },
-                        glow: {
-                            '0%': { boxShadow: '0 0 8px #0ea5e940' },
-                            '100%': { boxShadow: '0 0 20px #22d3ee60' }
-                        }
-                    }
                 }
             }
         }
     </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .text-gradient {
-                background-clip: text;
-                -webkit-background-clip: text;
-                color: transparent;
-                background-image: linear-gradient(90deg, #0ea5e9, #22d3ee);
-            }
-            .border-glow {
-                @apply border border-labPrimary/30 animate-glow rounded-md;
-            }
-            .bg-grid {
-                background-image: 
-                    linear-gradient(#1e2530 1px, transparent 1px),
-                    linear-gradient(90deg, #1e2530 1px, transparent 1px);
-                background-size: 40px 40px;
-            }
-            .data-line {
-                position: absolute;
-                width: 1px;
-                height: 60px;
-                background: linear-gradient(to bottom, transparent, #0ea5e960, transparent);
-                animation: flow 8s linear infinite;
-            }
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: '"Noto Sans SC"', '"Inter"', system-ui, sans-serif;
+            color: #1a1a1a;
+            background: #f3f3f3;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 导航栏滚动效果 */
+        .nav-scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* 产品图悬浮效果 */
+        .hero-image {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        /* 按钮悬浮效果 */
+        .btn-primary {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+        }
+        
+        /* 卡片悬浮效果 - 微软Fluent风格 */
+        .feature-card {
+            transition: all 0.2s ease;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            border-color: #d4d4d4;
+        }
+        
+        /* 渐入动画 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
-<body class="bg-labBlack text-slate-200 font-code overflow-x-hidden relative">
-    <!-- 背景数据流粒子 -->
-    <div id="dataBg" class="fixed inset-0 bg-grid opacity-30 pointer-events-none z-0"></div>
+<body>
 
     <!-- 导航栏 -->
-    <header class="sticky top-0 z-50 bg-labDark/80 backdrop-blur-md border-b border-labBorder">
-        <div class="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
+    <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 md:px-8 py-4 flex justify-between items-center">
             <a href="#" class="flex items-center gap-3">
-                <div class="w-10 h-10 flex items-center justify-center border-glow">
-                    <i class="fa fa-microchip text-labCyan text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-gradient">原创实验室</h1>
-                    <p class="text-xs text-labGray tracking-widest">YUANCHUANG LAB</p>
-                </div>
+                <img src="logo.png" alt="原创实验室" class="w-9 h-9">
+                <span class="text-lg font-bold text-textMain">原创实验室</span>
             </a>
+            
             <!-- 桌面导航 -->
-            <nav class="hidden md:flex gap-8 text-sm">
-                <a href="#home" class="hover:text-labCyan transition-colors">首页</a>
-                <a href="#about" class="hover:text-labCyan transition-colors">实验室简介</a>
-                <a href="#research" class="hover:text-labCyan transition-colors">研究方向</a>
-                <a href="#works" class="hover:text-labCyan transition-colors">研发成果</a>
-                <a href="#log" class="hover:text-labCyan transition-colors">实验日志</a>
+            <nav class="hidden md:flex items-center gap-8 text-sm text-textGray">
+                <a href="#home" class="hover:text-primary transition-colors">首页</a>
+                <a href="#about" class="hover:text-primary transition-colors">实验室简介</a>
+                <a href="#research" class="hover:text-primary transition-colors">研究方向</a>
+                <a href="#works" class="hover:text-primary transition-colors">研发成果</a>
+                <a href="#log" class="hover:text-primary transition-colors">实验日志</a>
+                <a href="#about" class="btn-primary px-5 py-2.5 bg-primary hover:bg-primaryDark text-white font-medium rounded-full">
+                    了解更多
+                </a>
             </nav>
+            
             <!-- 移动端菜单按钮 -->
-            <button id="menuBtn" class="md:hidden text-labCyan text-xl">
+            <button id="menuBtn" class="md:hidden text-textMain text-xl">
                 <i class="fa fa-bars"></i>
             </button>
         </div>
+        
         <!-- 移动端下拉菜单 -->
-        <div id="mobileMenu" class="hidden md:hidden bg-labDark border-t border-labBorder px-4 py-4">
-            <nav class="flex flex-col gap-4 text-sm">
-                <a href="#home" class="hover:text-labCyan transition-colors">首页</a>
-                <a href="#about" class="hover:text-labCyan transition-colors">实验室简介</a>
-                <a href="#research" class="hover:text-labCyan transition-colors">研究方向</a>
-                <a href="#works" class="hover:text-labCyan transition-colors">研发成果</a>
-                <a href="#log" class="hover:text-labCyan transition-colors">实验日志</a>
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-100 px-6 py-4 shadow-lg">
+            <nav class="flex flex-col gap-4 text-sm text-textGray">
+                <a href="#home" class="hover:text-primary transition-colors py-2">首页</a>
+                <a href="#about" class="hover:text-primary transition-colors py-2">实验室简介</a>
+                <a href="#research" class="hover:text-primary transition-colors py-2">研究方向</a>
+                <a href="#works" class="hover:text-primary transition-colors py-2">研发成果</a>
+                <a href="#log" class="hover:text-primary transition-colors py-2">实验日志</a>
             </nav>
         </div>
     </header>
 
-    <main class="relative z-10">
+    <main>
+
         <!-- 首屏 Hero 区域 -->
-        <section id="home" class="min-h-[85vh] flex items-center container mx-auto px-4 md:px-8 py-16">
-            <div class="max-w-4xl">
-                <p class="text-labCyan text-sm tracking-[0.3em] mb-4">PHYSICAL ENGINEERING & BOTTOM-TECH RESEARCH</p>
-                <h2 class="text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-tight mb-6">
-                    <span class="text-gradient">深耕底层技术</span><br>
-                    以物理实践印证数字规律
-                </h2>
-                <p class="text-labGray text-lg md:text-xl max-w-2xl mb-10 leading-relaxed">
-                    独立非盈利硬核工程实验室，专注硬件改造、网络底层、Linux架构、本地AI算力集群实证研究。
-                    所有自研成果完成专利备案后全开源，拒绝表层商业包装，只做纯粹技术沉淀。
-                </p>
-                <div class="flex flex-wrap gap-4">
-                    <a href="#research" class="px-6 py-3 bg-labPrimary hover:bg-labCyan transition-colors text-labBlack font-bold rounded-sm">
-                        查看研究领域
-                    </a>
-                    <a href="#works" class="px-6 py-3 border border-labPrimary/50 hover:border-labCyan transition-colors rounded-sm">
-                        开源研发存档
-                    </a>
-                </div>
-                <div class="mt-16 flex items-center gap-6 text-labGray text-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="fa fa-server text-labCyan"></i>
-                        <span>本地AI算力集群</span>
+        <section id="home" class="min-h-screen flex items-center pt-20 pb-16">
+            <div class="container mx-auto px-6 md:px-8">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <!-- 左侧文字 -->
+                    <div class="fade-in">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-8">
+                            <i class="fa fa-flask"></i>
+                            <span>硬核工程实证实验室</span>
+                        </div>
+                        
+                        <h1 class="font-black leading-[1.2] mb-8 text-textMain relative">
+                            <!-- 装饰线 -->
+                            <div class="absolute -left-4 top-2 bottom-2 w-1 bg-gradient-to-b from-primary/40 via-primary to-primary/40 rounded-full hidden md:block"></div>
+                            
+                            <div class="text-[clamp(1.8rem,4.5vw,3rem)] font-bold text-textMain tracking-wide">
+                                以原创构建未来
+                            </div>
+                            
+                            <div class="text-[clamp(2.8rem,7vw,5rem)] font-black text-primary my-2 ml-6 md:ml-12 tracking-tight">
+                                以实践探物理
+                            </div>
+                            
+                            <div class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-textMain ml-3 md:ml-6 tracking-wide">
+                                以时光淬技术
+                            </div>
+                        </h1>
+                        
+                        <p class="text-lg md:text-xl text-textGray max-w-xl mb-10 leading-relaxed">
+                            由个人工作室搭建的非盈利技术实验室，研发成果完成后源码开源，期待与同好携手，一同专注、共创沉淀。
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-4 mb-12">
+                            <a href="#works" class="btn-primary px-8 py-3.5 bg-primary hover:bg-primaryDark text-white font-semibold rounded-full">
+                                查看开源项目
+                            </a>
+                            <a href="#log" class="px-8 py-3.5 border border-gray-200 hover:border-primary hover:text-primary transition-colors rounded-full font-medium text-textMain">
+                                实验室日志
+                            </a>
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center gap-8 text-textGray text-sm">
+                            <div class="flex items-center gap-2">
+                                <i class="fa fa-server text-primary"></i>
+                                <span>本地AI算力集群</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa fa-sitemap text-primary"></i>
+                                <span>通信网络底层调优</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa fa-cogs text-primary"></i>
+                                <span>嵌入式硬件重构</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fa fa-sitemap text-labCyan"></i>
-                        <span>通信网络底层调优</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fa fa-cogs text-labCyan"></i>
-                        <span>嵌入式硬件重构</span>
+                    
+                    <!-- 右侧图片/示意 -->
+                    <div class="fade-in flex justify-center lg:justify-end">
+                        <div class="relative hero-image">
+                            <div class="w-full max-w-lg aspect-[4/3] bg-gradient-to-br from-primary/5 to-primary/10 rounded-3xl flex items-center justify-center shadow-2xl">
+                                <div class="text-center p-12">
+                                    <div class="w-24 h-24 mx-auto mb-6 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                                        <img src="logo.png" alt="原创实验室" class="w-16 h-16">
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-textMain mb-2">原创实验室</h3>
+                                    <p class="text-textGray">YuanChuang Lab</p>
+                                    <div class="mt-6 flex justify-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                                        <span class="text-sm text-primary font-medium">Temporal Generation</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 装饰元素 -->
+                            <div class="absolute -top-4 -right-4 w-20 h-20 bg-primary/20 rounded-full blur-2xl"></div>
+                            <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 实验室简介 -->
-        <section id="about" class="bg-labDark py-20">
-            <div class="container mx-auto px-4 md:px-8">
-                <div class="mb-12">
-                    <p class="text-labCyan text-sm tracking-[0.2em] mb-2">ABOUT LAB</p>
-                    <h3 class="text-3xl md:text-4xl font-bold">实验室内核与研发理念</h3>
+        <!-- 致未来同行者 - 公开信 -->
+        <section id="about" class="py-24">
+            <div class="container mx-auto px-6 md:px-8">
+                <div class="mb-10 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold text-textMain">实验室介绍</h2>
                 </div>
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="space-y-6 text-labGray leading-relaxed">
-                        <p>原创实验室起源于童年家庭工程实验室熏陶，以「物理实证主义」为核心研发准则，拒绝纸上谈兵，所有技术结论均经过拆解、焊接、组网、实测复现验证。</p>
-                        <p>本实验室完全剥离商业盈利诉求，不承接外包、不售卖技术服务、不打造流量产品。资金全部来源于个人副业收入，90%收益持续反哺硬件设备与底层技术探索。</p>
-                        <p class="text-labCyan font-bold text-lg">Temporal Generation — 技术恒存，迭代不止</p>
+                
+                <div class="grid md:grid-cols-2 gap-12 items-start">
+                    <!-- 左侧：公开信内容 -->
+                    <div class="fade-in">
+                        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+                            <!-- 称呼 -->
+                            <h3 class="text-xl md:text-2xl font-bold text-textMain mb-5">致未来同行者：</h3>
+                            
+                            <!-- 正文 -->
+                            <div class="space-y-4 text-textGray leading-relaxed">
+                                <p class="indent-8">这里是原创实验室，只是一间因热爱才成立的技术小空间。实验室不以盈利为目的，不做商业宣传，也不追逐流量热度。全部研发设备、日常运营开销，都靠线下个人工作室独自承担，没有外部资本扶持。我们定下一条不变的规矩：所有自主研发的项目，完成后永久免费对外开放源码。</p>
+                                
+                                <p class="indent-8">创立这里，从来不是想一个人埋头研究。只是厌倦了行业里浮躁的风气，想安安静静钻研底层技术，也想遇见一群志同道合、真心喜欢技术的朋友。技术不该独自私藏，热爱可以互相陪伴。期待能和愿意踏实沉淀、乐于分享交流的你相遇，一起静下心钻研，共同打磨技术。</p>
+                                
+                                <p class="indent-8">以原创构建未来，以实践探物理，以时光淬技术。</p>
+                            </div>
+                            
+                            <!-- 落款 -->
+                            <div class="mt-6 text-right">
+                                <p class="text-textGray">—— 原创实验室</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="border-glow p-6">
-                            <i class="fa fa-code-fork text-3xl text-labCyan mb-4"></i>
-                            <h4 class="text-xl font-bold mb-2">开源无私</h4>
-                            <p class="text-sm text-labGray">自研模块专利保护后全公开，无技术封锁，供开发者共同验证迭代</p>
+                    
+                    <!-- 右侧：四个核心理念卡片 -->
+                    <div class="grid grid-cols-2 gap-5 fade-in">
+                        <div class="feature-card bg-white p-7 rounded-2xl border border-gray-100">
+                            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
+                                <i class="fa fa-code-fork text-primary text-xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold mb-2 text-textMain">全开源承诺</h4>
+                            <p class="text-sm text-textGray leading-relaxed">所有自研项目完成后永久公开源码，无任何技术保留</p>
                         </div>
-                        <div class="border-glow p-6">
-                            <i class="fa fa-flask text-3xl text-labCyan mb-4"></i>
-                            <h4 class="text-xl font-bold mb-2">实证研发</h4>
-                            <p class="text-sm text-labGray">所有理论必须通过物理设备实测，杜绝纯纸面推演</p>
+                        
+                        <div class="feature-card bg-white p-7 rounded-2xl border border-gray-100">
+                            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
+                                <i class="fa fa-flask text-primary text-xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold mb-2 text-textMain">物理实证</h4>
+                            <p class="text-sm text-textGray leading-relaxed">拒绝纸上谈兵，所有结论必须通过真实设备实测验证</p>
                         </div>
-                        <div class="border-glow p-6">
-                            <i class="fa fa-layer-group text-3xl text-labCyan mb-4"></i>
-                            <h4 class="text-xl font-bold mb-2">深耕底层</h4>
-                            <p class="text-sm text-labGray">避开浅层应用开发，聚焦硬件、系统、通信基础架构</p>
+                        
+                        <div class="feature-card bg-white p-7 rounded-2xl border border-gray-100">
+                            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
+                                <i class="fa fa-microchip text-primary text-xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold mb-2 text-textMain">底层聚焦</h4>
+                            <p class="text-sm text-textGray leading-relaxed">不做浅层应用，专注硬件、网络、系统底层技术</p>
                         </div>
-                        <div class="border-glow p-6">
-                            <i class="fa fa-search text-3xl text-labCyan mb-4"></i>
-                            <h4 class="text-xl font-bold mb-2">垂直深耕</h4>
-                            <p class="text-sm text-labGray">不泛化涉猎，四大固定方向持续长期深度研究</p>
+                        
+                        <div class="feature-card bg-white p-7 rounded-2xl border border-gray-100">
+                            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
+                                <i class="fa fa-heart text-primary text-xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold mb-2 text-textMain">纯热爱驱动</h4>
+                            <p class="text-sm text-textGray leading-relaxed">非盈利、无资本、不逐流，只因对技术的纯粹热爱</p>
                         </div>
                     </div>
                 </div>
@@ -186,175 +294,232 @@
         </section>
 
         <!-- 四大研究方向 -->
-        <section id="research" class="py-20 container mx-auto px-4 md:px-8">
-            <div class="mb-12">
-                <p class="text-labCyan text-sm tracking-[0.2em] mb-2">RESEARCH DIRECTION</p>
-                <h3 class="text-3xl md:text-4xl font-bold">四大垂直研发领域</h3>
-            </div>
-            <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
-                <!-- 1 网络基建底层 -->
-                <div class="border-glow p-8 h-full">
-                    <i class="fa fa-wifi text-4xl text-labCyan mb-6"></i>
-                    <h4 class="text-2xl font-bold mb-4">网络基建底层研究</h4>
-                    <ul class="space-y-3 text-labGray text-sm">
-                        <li>• 企业交换机深度调优、复杂园区网络重构</li>
-                        <li>• OLT光纤通信原理与局域网架构搭建</li>
-                        <li>• 铜缆/光纤链路性能对比与带宽调度优化</li>
-                        <li>• 多设备混合环境网络故障底层排查方案</li>
-                    </ul>
+        <section id="research" class="py-24">
+            <div class="container mx-auto px-6 md:px-8">
+                <div class="mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold text-textMain">技术探索方向</h2>
                 </div>
-                <!-- 2 嵌入式硬件改造 -->
-                <div class="border-glow p-8 h-full">
-                    <i class="fa fa-microchip text-4xl text-labCyan mb-6"></i>
-                    <h4 class="text-2xl font-bold mb-4">嵌入式硬件重构</h4>
-                    <ul class="space-y-3 text-labGray text-sm">
-                        <li>• 芯片模块拆解、电路焊接与无尘硬件改装</li>
-                        <li>• 自研传感模块、物理设备工程复现</li>
-                        <li>• 3D打印硬件外壳配套电子方案设计</li>
-                        <li>• 民用声学、声纳通信设备底层调试</li>
-                    </ul>
-                </div>
-                <!-- 3 Linux底层架构 -->
-                <div class="border-glow p-8 h-full">
-                    <i class="fa fa-terminal text-4xl text-labCyan mb-6"></i>
-                    <h4 class="text-2xl font-bold mb-4">Linux系统底层研究</h4>
-                    <ul class="space-y-3 text-labGray text-sm">
-                        <li>• 发行版深度定制、服务器极简裁剪</li>
-                        <li>• 网工专用Linux环境部署与工具链搭建</li>
-                        <li>• Windows/Linux双系统集群协同方案</li>
-                        <li>• 本地服务器运维、私有网络服务搭建</li>
-                    </ul>
-                </div>
-                <!-- 4 本地AI算力集群 -->
-                <div class="border-glow p-8 h-full">
-                    <i class="fa fa-cube text-4xl text-labCyan mb-6"></i>
-                    <h4 class="text-2xl font-bold mb-4">本地AI算力落地</h4>
-                    <ul class="space-y-3 text-labGray text-sm">
-                        <li>• Mac Studio多机本地大模型集群搭建</li>
-                        <li>• 模型私有化本地推理、离线部署方案</li>
-                        <li>• AI辅助硬件3D建模、工程图纸生成</li>
-                        <li>• 无外网私有算力环境安全隔离架构</li>
-                    </ul>
+                
+                <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    
+                    <!-- 1 硬件实验 -->
+                    <div class="feature-card bg-white p-8 rounded-2xl border border-gray-100 fade-in">
+                        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa fa-wrench text-primary text-2xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-3 text-textMain">硬件改装实验</h4>
+                        <p class="text-textGray text-sm leading-relaxed">电子模块拆解、传感模块DIY、电路焊接调试、3D打印外壳设计，二手设备翻新改造，各种硬件脑洞的动手验证。</p>
+                    </div>
+                    
+                    <!-- 2 网络实验 -->
+                    <div class="feature-card bg-white p-8 rounded-2xl border border-gray-100 fade-in">
+                        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa fa-wifi text-primary text-2xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-3 text-textMain">网络搭建测试</h4>
+                        <p class="text-textGray text-sm leading-relaxed">中小型网络环境搭建、链路性能实测、交换机调优、带宽分配方案验证，实用网络巡检工具的开发与迭代。</p>
+                    </div>
+                    
+                    <!-- 3 工具实验 -->
+                    <div class="feature-card bg-white p-8 rounded-2xl border border-gray-100 fade-in">
+                        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa fa-code text-primary text-2xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-3 text-textMain">效率工具开发</h4>
+                        <p class="text-textGray text-sm leading-relaxed">运维脚本、小工具编写、Linux环境部署、系统优化、自动化方案，解决实际工作中遇到的各种效率问题。</p>
+                    </div>
+                    
+                    <!-- 4 创意实验 -->
+                    <div class="feature-card bg-white p-8 rounded-2xl border border-gray-100 fade-in">
+                        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa fa-lightbulb-o text-primary text-2xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-3 text-textMain">创意方案验证</h4>
+                        <p class="text-textGray text-sm leading-relaxed">本地AI落地、新奇技术方案实测、脑洞项目验证，把各种想法动手做出来，用真实结果验证技术可行性。</p>
+                    </div>
+                    
                 </div>
             </div>
         </section>
 
         <!-- 研发成果 -->
-        <section id="works" class="bg-labDark py-20">
-            <div class="container mx-auto px-4 md:px-8">
-                <div class="mb-12">
-                    <p class="text-labCyan text-sm tracking-[0.2em] mb-2">OPEN SOURCE WORKS</p>
-                    <h3 class="text-3xl md:text-4xl font-bold">开源研发存档成果</h3>
+        <section id="works" class="py-24">
+            <div class="container mx-auto px-6 md:px-8">
+                <div class="mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold text-textMain">开源项目</h2>
                 </div>
+                
                 <div class="grid md:grid-cols-3 gap-6">
-                    <!-- 成果卡片1 -->
-                    <div class="border border-labBorder hover:border-labPrimary/50 transition-colors p-6 rounded-md">
-                        <div class="text-labCyan text-xs mb-2">网络底层 · 开源方案</div>
-                        <h4 class="text-xl font-bold mb-3">园区混合网络优化脚本库</h4>
-                        <p class="text-labGray text-sm mb-4">华为S5700交换机、TP-Link设备批量调优配置脚本，适配复杂多设备局域网故障排查</p>
-                        <a href="#" class="text-labCyan text-sm flex items-center gap-2 hover:gap-3 transition-all">
-                            查看开源文档 <i class="fa fa-arrow-right"></i>
-                        </a>
+                    
+                    <!-- 敬请期待卡片1 -->
+                    <div class="feature-card bg-white p-7 rounded-2xl border border-gray-100 border-dashed fade-in flex flex-col items-center justify-center text-center min-h-[220px]">
+                        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fa fa-clock-o text-textLight text-xl"></i>
+                        </div>
+                        <h4 class="text-lg font-bold mb-2 text-textMain">敬请期待</h4>
+                        <p class="text-textGray text-sm">项目整理中，即将上线</p>
                     </div>
-                    <!-- 成果卡片2 -->
-                    <div class="border border-labBorder hover:border-labPrimary/50 transition-colors p-6 rounded-md">
-                        <div class="text-labCyan text-xs mb-2">硬件工程 · 开源模块</div>
-                        <h4 class="text-xl font-bold mb-3">通用传感硬件改装套件</h4>
-                        <p class="text-labGray text-sm mb-4">自研低成本传感器电路图纸、焊接流程、3D打印外壳模型全开源资料包</p>
-                        <a href="#" class="text-labCyan text-sm flex items-center gap-2 hover:gap-3 transition-all">
-                            查看开源文档 <i class="fa fa-arrow-right"></i>
-                        </a>
+                    
+                    <!-- 敬请期待卡片2 -->
+                    <div class="feature-card bg-white p-7 rounded-2xl border border-gray-100 border-dashed fade-in flex flex-col items-center justify-center text-center min-h-[220px]">
+                        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fa fa-clock-o text-textLight text-xl"></i>
+                        </div>
+                        <h4 class="text-lg font-bold mb-2 text-textMain">敬请期待</h4>
+                        <p class="text-textGray text-sm">项目整理中，即将上线</p>
                     </div>
-                    <!-- 成果卡片3 -->
-                    <div class="border border-labBorder hover:border-labPrimary/50 transition-colors p-6 rounded-md">
-                        <div class="text-labCyan text-xs mb-2">算力集群 · 部署教程</div>
-                        <h4 class="text-xl font-bold mb-3">本地多机AI集群搭建手册</h4>
-                        <p class="text-labGray text-sm mb-4">Mac Studio集群离线大模型推理完整部署流程，私有隔离算力环境搭建指南</p>
-                        <a href="#" class="text-labCyan text-sm flex items-center gap-2 hover:gap-3 transition-all">
-                            查看开源文档 <i class="fa fa-arrow-right"></i>
-                        </a>
+                    
+                    <!-- 敬请期待卡片3 -->
+                    <div class="feature-card bg-white p-7 rounded-2xl border border-gray-100 border-dashed fade-in flex flex-col items-center justify-center text-center min-h-[220px]">
+                        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fa fa-clock-o text-textLight text-xl"></i>
+                        </div>
+                        <h4 class="text-lg font-bold mb-2 text-textMain">敬请期待</h4>
+                        <p class="text-textGray text-sm">项目整理中，即将上线</p>
                     </div>
+                    
                 </div>
             </div>
         </section>
 
         <!-- 实验日志 -->
-        <section id="log" class="py-20 container mx-auto px-4 md:px-8">
-            <div class="mb-12">
-                <p class="text-labCyan text-sm tracking-[0.2em] mb-2">LAB DEBUG LOG</p>
-                <h3 class="text-3xl md:text-4xl font-bold">实验调试日志</h3>
-            </div>
-            <div class="space-y-6 max-w-3xl">
-                <!-- 日志单条 -->
-                <div class="border-glow p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-labCyan text-sm">2026-08-07</span>
-                        <span class="text-xs px-2 py-1 bg-labPrimary/20 text-labCyan">硬件调试</span>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">3D打印传感设备外壳结构优化测试</h4>
-                    <p class="text-labGray text-sm">完成多版外壳公差测试，修正电路接口卡位尺寸，配套AI建模脚本同步上传开源仓库，解决焊接装配干涉问题。</p>
+        <section id="log" class="py-24">
+            <div class="container mx-auto px-6 md:px-8">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold text-textMain">实验室测试日志</h2>
                 </div>
-                <div class="border-glow p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-labCyan text-sm">2026-08-05</span>
-                        <span class="text-xs px-2 py-1 bg-labPrimary/20 text-labCyan">算力集群</span>
+                
+                <div class="max-w-3xl mx-auto space-y-4">
+                    
+                    <!-- 日志单条 - 可折叠 -->
+                    <div class="log-card feature-card bg-white rounded-2xl border border-gray-200 shadow-sm fade-in overflow-hidden cursor-pointer transition-all hover:shadow-md" onclick="toggleLog(this)">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-primary text-sm font-medium">2026-08-08</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">硬件搭建</span>
+                                    <i class="fa fa-chevron-down text-textLight transition-transform duration-300 log-arrow"></i>
+                                </div>
+                            </div>
+                            <h4 class="font-bold text-lg text-textMain">无尘工作台与激光雕刻机部署完成</h4>
+                        </div>
+                        <div class="log-content px-6 pb-6 hidden">
+                            <p class="text-textGray text-sm leading-relaxed pt-2 border-t border-gray-50">完成无尘工作台搭建，配备防静电垫与防尘照明系统，满足精密焊接与硬件改装需求。激光雕刻机调试完毕，可用于设备面板标识、外壳定制化加工。</p>
+                        </div>
                     </div>
-                    <h4 class="font-bold text-lg mb-2">四台Mac Studio本地模型并行推理调优</h4>
-                    <p class="text-labGray text-sm">完成私有内网算力调度脚本编写，隔离外网访问通道，测试离线模型加载速度，优化多机显存分配策略。</p>
-                </div>
-                <div class="border-glow p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-labCyan text-sm">2026-08-03</span>
-                        <span class="text-xs px-2 py-1 bg-labPrimary/20 text-labCyan">网络调优</span>
+                    
+                    <div class="log-card feature-card bg-white rounded-2xl border border-gray-200 shadow-sm fade-in overflow-hidden cursor-pointer transition-all hover:shadow-md" onclick="toggleLog(this)">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-primary text-sm font-medium">2026-08-06</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">硬件搭建</span>
+                                    <i class="fa fa-chevron-down text-textLight transition-transform duration-300 log-arrow"></i>
+                                </div>
+                            </div>
+                            <h4 class="font-bold text-lg text-textMain">3D打印机搭建完成并投入使用</h4>
+                        </div>
+                        <div class="log-content px-6 pb-6 hidden">
+                            <p class="text-textGray text-sm leading-relaxed pt-2 border-t border-gray-50">完成FDM 3D打印机组装与校准，打印精度调试达标。已开始用于硬件项目的外壳设计验证、传感器支架打印，大幅缩短硬件迭代周期。</p>
+                        </div>
                     </div>
-                    <h4 class="font-bold text-lg mb-2">OLT光纤局域网带宽分配实测记录</h4>
-                    <p class="text-labGray text-sm">对比铜缆与光纤链路延迟差异，整理多设备并发场景下QoS调度配置方案，文档归档至网络开源库。</p>
+                    
+                    <div class="log-card feature-card bg-white rounded-2xl border border-gray-200 shadow-sm fade-in overflow-hidden cursor-pointer transition-all hover:shadow-md" onclick="toggleLog(this)">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-primary text-sm font-medium">2026-08-05</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">算力搭建</span>
+                                    <i class="fa fa-chevron-down text-textLight transition-transform duration-300 log-arrow"></i>
+                                </div>
+                            </div>
+                            <h4 class="font-bold text-lg text-textMain">Mac Studio本地AI大模型环境部署</h4>
+                        </div>
+                        <div class="log-content px-6 pb-6 hidden">
+                            <p class="text-textGray text-sm leading-relaxed pt-2 border-t border-gray-50">完成Mac Studio本地大模型环境搭建，配置离线推理通道，实现私有内网隔离运行。已开始测试AI辅助硬件建模、代码生成等场景应用。</p>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </section>
-    </main>
 
-    <!-- 页脚 -->
-    <footer class="bg-labDark border-t border-labBorder py-12 relative z-10">
-        <div class="container mx-auto px-4 md:px-8">
-            <div class="flex flex-col md:flex-row justify-between gap-8">
-                <div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 flex items-center justify-center border-glow">
-                            <i class="fa fa-microchip text-labCyan text-xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xl font-bold text-gradient">原创实验室</h4>
-                            <p class="text-xs text-labGray tracking-widest">YUANCHUANG LAB</p>
-                        </div>
-                    </div>
-                    <p class="text-labGray max-w-md text-sm">纯底层工程实证私人实验室，非盈利开源研发机构，无商业服务、无外包接单业务。</p>
-                </div>
-                <div class="md:text-right">
-                    <p class="text-labCyan font-bold mb-2 text-lg">Temporal Generation</p>
-                    <p class="text-labGray text-sm mb-4">技术恒存，迭代不止 | Open Source & Pure Research</p>
-                    <div class="flex gap-4 md:justify-end text-labCyan text-lg">
-                        <a href="#" target="_blank"><i class="fa fa-github"></i></a>
-                        <a href="#" target="_blank"><i class="fa fa-code-fork"></i></a>
-                        <a href="#" target="_blank"><i class="fa fa-terminal"></i></a>
+        <!-- CTA 区域 -->
+        <section class="py-20">
+            <div class="container mx-auto px-6 md:px-8">
+                <div class="max-w-3xl mx-auto text-center fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold text-textMain mb-6">
+                        技术恒存，迭代不止
+                    </h2>
+                    <p class="text-textGray text-lg mb-10">
+                        所有研发成果无条件公开开源，回馈技术社区
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <a href="#research" class="btn-primary px-8 py-3.5 bg-primary hover:bg-primaryDark text-white font-semibold rounded-full">
+                            探索研究方向
+                        </a>
+                        <a href="#works" class="px-8 py-3.5 border border-gray-200 hover:border-primary hover:text-primary transition-colors rounded-full font-medium text-textMain bg-white">
+                            查看开源项目
+                        </a>
                     </div>
                 </div>
             </div>
-            <div class="mt-10 pt-6 border-t border-labBorder text-center text-labGray text-xs">
-                © 2026 原创实验室 YuanChuang Lab · 所有开源内容遵循开源协议公开共享
+        </section>
+
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-100 py-16">
+        <div class="container mx-auto px-6 md:px-8">
+            <div class="flex flex-col md:flex-row justify-between gap-10 mb-12">
+                <div class="max-w-md">
+                    <div class="flex items-center gap-3 mb-5">
+                        <img src="logo.png" alt="原创实验室" class="w-10 h-10">
+                        <div>
+                            <h4 class="text-lg font-bold text-textMain">原创实验室</h4>
+                            <p class="text-xs text-textLight tracking-widest">YUANCHUANG LAB</p>
+                        </div>
+                    </div>
+                    <p class="text-textGray text-sm leading-relaxed">
+                        纯底层工程实证私人实验室，非盈利开源研发机构，无商业服务、无外包接单业务。
+                    </p>
+                </div>
+                
+                <div class="md:text-right">
+                    <p class="text-primary font-bold mb-2 text-lg">Temporal Generation</p>
+                    <p class="text-textGray text-sm mb-5">技术恒存，迭代不止 | Open Source & Pure Research</p>
+                    <div class="flex gap-4 md:justify-end">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-primary/10 flex items-center justify-center text-textGray hover:text-primary transition-colors">
+                            <i class="fa fa-github"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-primary/10 flex items-center justify-center text-textGray hover:text-primary transition-colors">
+                            <i class="fa fa-code-fork"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-primary/10 flex items-center justify-center text-textGray hover:text-primary transition-colors">
+                            <i class="fa fa-terminal"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-100 text-center">
+                <p class="text-textLight text-xs">
+                    © 2026 原创实验室 YuanChuang Lab · 所有开源内容遵循开源协议公开共享
+                </p>
             </div>
         </div>
     </footer>
 
-    <!-- 交互JS脚本 -->
+    <!-- 交互脚本 -->
     <script>
         // 移动端菜单切换
         const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
+        
         menuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
-
+        
         // 平滑滚动锚点
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -363,30 +528,55 @@
                 document.querySelector(targetId).scrollIntoView({
                     behavior: 'smooth'
                 });
-                // 点击后关闭移动端菜单
                 mobileMenu.classList.add('hidden');
             });
         });
-
-        // 生成背景流动数据流线条
-        const dataBg = document.getElementById('dataBg');
-        function createDataLine() {
-            const line = document.createElement('div');
-            line.className = 'data-line';
-            // 随机横向位置
-            line.style.left = Math.random() * 100 + '%';
-            // 随机动画时长
-            line.style.animationDuration = (6 + Math.random() * 6) + 's';
-            dataBg.appendChild(line);
-            // 线条循环销毁重建
-            setTimeout(() => {
-                line.remove();
-            }, 12000);
+        
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 20) {
+                navbar.classList.add('nav-scrolled');
+            } else {
+                navbar.classList.remove('nav-scrolled');
+            }
+        });
+        
+        // 滚动渐入动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // 日志折叠展开
+        function toggleLog(card) {
+            const content = card.querySelector('.log-content');
+            const arrow = card.querySelector('.log-arrow');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                arrow.style.transform = 'rotate(0deg)';
+            }
         }
-        // 初始生成30条数据流
-        for(let i=0; i<30; i++) createDataLine();
-        // 持续新增线条
-        setInterval(createDataLine, 400);
     </script>
+
 </body>
 </html>
